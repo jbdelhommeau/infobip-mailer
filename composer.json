@@ -1,0 +1,29 @@
+{
+    "name": "jbdelhommeau/infobip-mailer",
+    "description": "Symonfy Infobip Mailer Bridge",
+    "type": "symfony-mailer-bridge",
+    "require": {
+        "php": ">=7.2.5",
+        "psr/event-dispatcher": "^1",
+        "symfony/mailer": "^5.1|^6.0"
+    },
+    "require-dev": {
+        "symfony/http-client": "^4.4|^5.0|^6.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Symfony\\Component\\Mailer\\Bridge\\Infobip\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Jean-Baptiste Delhommeau",
+            "email": "jean-baptiste.delhommeau@yousign.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
