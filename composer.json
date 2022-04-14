@@ -1,11 +1,12 @@
 {
-    "name": "jbdelhommeau/infobip-mailer",
+    "name": "symfony/infobip-mailer",
     "description": "Symonfy Infobip Mailer Bridge",
     "type": "symfony-mailer-bridge",
     "require": {
         "php": ">=7.2.5",
         "psr/event-dispatcher": "^1",
-        "symfony/mailer": "^5.1|^6.0"
+        "symfony/mailer": "^5.1|^6.0",
+        "symfony/framework-bundle": "^5.4|^6.0"
     },
     "require-dev": {
         "symfony/http-client": "^4.4|^5.0|^6.0"
