@@ -11,15 +11,14 @@
 
 namespace Symfony\Component\Mailer\Bridge\Infobip\Transport;
 
-
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractApiTransport;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -52,11 +51,6 @@ class InfobipApiTransport extends AbstractApiTransport
         $headers[] = sprintf('Authorization: App %s', $this->key);
         $headers[] = 'Accept: application/json';
 
-        dump([
-            'headers' => $headers,
-            'body' => $formData->bodyToIterable(),
-        ]);
-
         $response = $this->client->request(
             'POST',
             sprintf('https://%s/email/%s/send', $this->getEndpoint(), self::API_VERSION),
@@ -69,8 +63,6 @@ class InfobipApiTransport extends AbstractApiTransport
         try {
             $statusCode = $response->getStatusCode();
             $result = $response->toArray(false);
-            dump($result);
-            dump($statusCode);
         } catch (DecodingExceptionInterface $e) {
             throw new HttpTransportException('Unable to send an email: '.$response->getContent(false).sprintf(' (code %d).', $statusCode), $response);
         } catch (TransportExceptionInterface $e) {
@@ -120,7 +112,26 @@ class InfobipApiTransport extends AbstractApiTransport
             $message[] = ['HTML' => $email->getHtmlBody()];
         }
 
+        $this->prepareAttachments($message, $email);
+
         return new FormDataPart($message);
+    }
+
+    private function prepareAttachments(array &$message, Email $email): void
+    {
+        foreach ($email->getAttachments() as $attachment)
+        {
+            $headers = $attachment->getPreparedHeaders();
+            $filename = $headers->getHeaderParameter('Content-Disposition', 'filename');
+
+            $dataPart = new DataPart($attachment->getBody(), $filename, $attachment->getMediaType().'/'.$attachment->getMediaSubtype());
+
+            if ('inline' === $headers->getHeaderBody('Content-Disposition')) {
+                $message[] = ['inlineImage' => $dataPart];
+            } else {
+                $message[] = ['attachment' => $dataPart];
+            }
+        }
     }
 
     private function addAddresses(array &$message, string $property, array $addresses): void
