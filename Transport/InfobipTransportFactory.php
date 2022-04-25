@@ -16,14 +16,18 @@ class InfobipTransportFactory extends AbstractTransportFactory
         $user = $this->getUser($dsn);
         $host = 'default' === $dsn->getHost() ? null : $dsn->getHost();
 
-        if (null === $host) {
-            throw new IncompleteDsnException('Infobip mailer DSN must contain a host.');
-        }
-
         if ('infobip+api' === $schema) {
+            if (null === $host) {
+                throw new IncompleteDsnException('Infobip mailer for API DSN must contain a host.');
+            }
+
             return (new InfobipApiTransport($user, $this->client, $this->dispatcher, $this->logger))
                 ->setHost($host)
             ;
+        }
+
+        if (\in_array($schema, ['infobip+smtp', 'infobip+smtps', 'infobip'])) {
+            return new InfobipSmtpTransport($user, $this->getPassword($dsn), $this->dispatcher, $this->logger);
         }
 
         throw new UnsupportedSchemeException($dsn, 'infobip', $this->getSupportedSchemes());
@@ -31,6 +35,6 @@ class InfobipTransportFactory extends AbstractTransportFactory
 
     protected function getSupportedSchemes(): array
     {
-        return ['infobip', 'infobip+api'];
+        return ['infobip', 'infobip+api', 'infobip+smtp', 'infobip+smtps'];
     }
 }

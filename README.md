@@ -8,7 +8,7 @@ Configuration examples:
 ```dotenv
 # API
 MAILER_DSN=infobip+api://$INFOBIP_API_KEY@$INFOBIP_BASE_URL
-# SMTP @todo
+# SMTP
 MAILER_DSN=infobip+smtp://$INFOBIP_API_KEY@default
 ```
 

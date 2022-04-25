@@ -1,6 +1,6 @@
 {
     "name": "symfony/infobip-mailer",
-    "description": "Symonfy Infobip Mailer Bridge",
+    "description": "Symfony Infobip Mailer Bridge",
     "type": "symfony-mailer-bridge",
     "require": {
         "php": ">=7.2.5",
