@@ -3,11 +3,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Mailer\Bridge\Infobip\Bundle;
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Mailer\Bridge\Infobip\Transport\InfobipTransportFactory;
 
