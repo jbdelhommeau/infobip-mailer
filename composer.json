@@ -2,6 +2,23 @@
     "name": "symfony/infobip-mailer",
     "description": "Symfony Infobip Mailer Bridge",
     "type": "symfony-mailer-bridge",
+    "keywords": [],
+    "homepage": "https://symfony.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jean-Baptiste Delhommeau",
+            "email": "jean-baptiste.delhommeau@yousign.com"
+        },
+        {
+            "name": "Benoit Galati",
+            "email": "benoit.galati@gmail.com"
+        },
+        {
+            "name": "Symfony Community",
+            "homepage": "https://symfony.com/contributors"
+        }
+    ],
     "require": {
         "php": ">=7.2.5",
         "psr/event-dispatcher": "^1",
@@ -11,7 +28,6 @@
     "require-dev": {
         "symfony/http-client": "^4.4|^5.0|^6.0"
     },
-    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Symfony\\Component\\Mailer\\Bridge\\Infobip\\": ""
@@ -20,11 +36,5 @@
             "/Tests/"
         ]
     },
-    "authors": [
-        {
-            "name": "Jean-Baptiste Delhommeau",
-            "email": "jean-baptiste.delhommeau@yousign.com"
-        }
-    ],
     "minimum-stability": "dev"
 }
