@@ -1,7 +1,10 @@
 <?php
 
-namespace Symfony\Component\Mailer\Bridge\Infobip\Transport;
+namespace Symfony\Component\Mailer\Bridge\Infobip\Tests\Transport;
 
+use Symfony\Component\Mailer\Bridge\Infobip\Transport\InfobipApiTransport;
+use Symfony\Component\Mailer\Bridge\Infobip\Transport\InfobipSmtpTransport;
+use Symfony\Component\Mailer\Bridge\Infobip\Transport\InfobipTransportFactory;
 use Symfony\Component\Mailer\Test\TransportFactoryTestCase;
 use Symfony\Component\Mailer\Transport\Dsn;
 use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
