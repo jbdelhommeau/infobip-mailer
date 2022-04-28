@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Symfony\Component\Mailer\Bridge\Infobip\Tests\Transport;
 
 use Symfony\Component\Mailer\Bridge\Infobip\Transport\InfobipApiTransport;

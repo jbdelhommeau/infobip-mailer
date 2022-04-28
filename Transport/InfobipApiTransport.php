@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -17,6 +19,7 @@ use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractApiTransport;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
@@ -25,6 +28,9 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
+/**
+ * @see https://www.infobip.com/docs/api#channels/email/send-email
+ */
 class InfobipApiTransport extends AbstractApiTransport
 {
     private const API_VERSION = '2';
@@ -45,10 +51,10 @@ class InfobipApiTransport extends AbstractApiTransport
 
     protected function doSendApi(SentMessage $sentMessage, Email $email, Envelope $envelope): ResponseInterface
     {
-        $formData = $this->getFormData($email, $envelope);
+        $formData = $this->formDataPart($email, $envelope);
 
         $headers = $formData->getPreparedHeaders()->toArray();
-        $headers[] = sprintf('Authorization: App %s', $this->key);
+        $headers[] = 'Authorization: App '.$this->key;
         $headers[] = 'Accept: application/json';
 
         $response = $this->client->request(
@@ -62,18 +68,23 @@ class InfobipApiTransport extends AbstractApiTransport
 
         try {
             $statusCode = $response->getStatusCode();
-            $result = $response->toArray(false);
-        } catch (DecodingExceptionInterface $e) {
-            throw new HttpTransportException('Unable to send an email: '.$response->getContent(false).sprintf(' (code %d).', $statusCode), $response);
         } catch (TransportExceptionInterface $e) {
             throw new HttpTransportException('Could not reach the remote Infobip server.', $response, 0, $e);
         }
 
         if (200 !== $statusCode) {
-            throw new HttpTransportException('Unable to send an email: '.$result['requestError']['serviceException']['text'].sprintf(' (code %d).', $statusCode), $response);
+            throw new HttpTransportException(sprintf('Unable to send an email: "%s" (code %d).', $response->getContent(false), $statusCode), $response);
         }
 
-        $sentMessage->setMessageId($result['messages'][0]['messageId']);
+        try {
+            $result = $response->toArray();
+        } catch (DecodingExceptionInterface $e) {
+            throw new HttpTransportException(sprintf('Unable to send an email: "%s" (code %d).', $response->getContent(false), $statusCode), $response, 0, $e);
+        }
+
+        if (isset($result['messages'][0]['messageId'])) {
+            $sentMessage->setMessageId($result['messages'][0]['messageId']);
+        }
 
         return $response;
     }
@@ -83,41 +94,41 @@ class InfobipApiTransport extends AbstractApiTransport
         return $this->host.($this->port ? ':'.$this->port : '');
     }
 
-    private function getFormData(Email $email, Envelope $envelope): FormDataPart
+    private function formDataPart(Email $email, Envelope $envelope): FormDataPart
     {
-        $message = [
-            ['from' => $envelope->getSender()->toString()],
-            ['subject' => $email->getSubject()],
+        $fields = [
+            'from' => $envelope->getSender()->toString(),
+            'subject' => $email->getSubject(),
         ];
 
-        $this->addAddresses($message,'to', $this->getRecipients($email, $envelope));
+        $this->addressesFormData($fields, 'to', $this->getRecipients($email, $envelope));
 
         if ($email->getCc()) {
-            $this->addAddresses($message, 'cc', $email->getCc());
+            $this->addressesFormData($fields, 'cc', $email->getCc());
         }
 
         if ($email->getBcc()) {
-            $this->addAddresses($message, 'bcc', $email->getBcc());
+            $this->addressesFormData($fields, 'bcc', $email->getBcc());
         }
 
         if ($email->getReplyTo()) {
-            $this->addAddresses($message, 'replyto', $email->getReplyTo());
+            $this->addressesFormData($fields, 'replyto', $email->getReplyTo());
         }
 
         if ($email->getTextBody()) {
-            $message[] = ['text' => $email->getTextBody()];
+            $fields['text'] = $email->getTextBody();
         }
 
         if ($email->getHtmlBody()) {
-            $message[] = ['HTML' => $email->getHtmlBody()];
+            $fields['HTML'] = $email->getHtmlBody();
         }
 
-        $this->prepareAttachments($message, $email);
+        $this->attachmentsFormData($fields, $email);
 
-        return new FormDataPart($message);
+        return new FormDataPart($fields);
     }
 
-    private function prepareAttachments(array &$message, Email $email): void
+    private function attachmentsFormData(array &$message, Email $email): void
     {
         foreach ($email->getAttachments() as $attachment)
         {
@@ -134,7 +145,10 @@ class InfobipApiTransport extends AbstractApiTransport
         }
     }
 
-    private function addAddresses(array &$message, string $property, array $addresses): void
+    /**
+     * @param Address[] $addresses
+     */
+    private function addressesFormData(array &$message, string $property, array $addresses): void
     {
         foreach ($addresses as $address) {
             $message[] = [$property => $address->toString()];
