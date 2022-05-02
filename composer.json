@@ -8,7 +8,7 @@
     "authors": [
         {
             "name": "Jean-Baptiste Delhommeau",
-            "email": "jean-baptiste.delhommeau@yousign.com"
+            "email": "jeanbadel@gmail.com"
         },
         {
             "name": "Benoit Galati",
@@ -21,7 +21,6 @@
     ],
     "require": {
         "php": ">=7.4.5",
-        "psr/event-dispatcher": "^1",
         "symfony/mailer": "^5.4|^6.0",
         "symfony/framework-bundle": "^5.4|^6.0"
     },

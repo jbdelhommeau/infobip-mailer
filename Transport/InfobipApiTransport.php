@@ -31,7 +31,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 /**
  * @see https://www.infobip.com/docs/api#channels/email/send-email
  */
-class InfobipApiTransport extends AbstractApiTransport
+final class InfobipApiTransport extends AbstractApiTransport
 {
     private const API_VERSION = '2';
 
@@ -130,8 +130,7 @@ class InfobipApiTransport extends AbstractApiTransport
 
     private function attachmentsFormData(array &$message, Email $email): void
     {
-        foreach ($email->getAttachments() as $attachment)
-        {
+        foreach ($email->getAttachments() as $attachment) {
             $headers = $attachment->getPreparedHeaders();
             $filename = $headers->getHeaderParameter('Content-Disposition', 'filename');
 

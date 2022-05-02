@@ -17,7 +17,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 
-class InfobipSmtpTransport extends EsmtpTransport
+final class InfobipSmtpTransport extends EsmtpTransport
 {
     public function __construct(string $key, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
@@ -26,5 +26,4 @@ class InfobipSmtpTransport extends EsmtpTransport
         $this->setUsername('App');
         $this->setPassword($key);
     }
-
 }

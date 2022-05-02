@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\Mailer\Bridge\Infobip\Transport;
 
 use Symfony\Component\Mailer\Exception\IncompleteDsnException;
@@ -10,7 +19,7 @@ use Symfony\Component\Mailer\Transport\AbstractTransportFactory;
 use Symfony\Component\Mailer\Transport\Dsn;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 
-class InfobipTransportFactory extends AbstractTransportFactory
+final class InfobipTransportFactory extends AbstractTransportFactory
 {
     public function create(Dsn $dsn): TransportInterface
     {

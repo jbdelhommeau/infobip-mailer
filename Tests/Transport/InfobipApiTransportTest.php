@@ -34,8 +34,7 @@ class InfobipApiTransportTest extends TestCase
     protected function setUp(): void
     {
         $this->response = new MockResponse('{}');
-        $this->httpClient = new class(fn() => $this->response) extends MockHttpClient
-        {
+        $this->httpClient = new class(fn () => $this->response) extends MockHttpClient {
             public function request(string $method, string $url, array $options = []): ResponseInterface
             {
                 // The only purpose of this method override is to record the request body as a string
@@ -75,7 +74,7 @@ class InfobipApiTransportTest extends TestCase
         $this->assertSame('https://99999.api.infobip.com/email/2/send', $this->response->getRequestUrl());
         $options = $this->response->getRequestOptions();
         $this->arrayHasKey('headers');
-        $this->assertCount(4,$options['headers']);
+        $this->assertCount(4, $options['headers']);
         $this->assertStringMatchesFormat('Content-Type: multipart/form-data; boundary=%s', $options['headers'][0]);
         $this->assertSame('Authorization: App k3y', $options['headers'][1]);
         $this->assertSame('Accept: application/json', $options['headers'][2]);
@@ -100,25 +99,25 @@ class InfobipApiTransportTest extends TestCase
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="from"
-            
+
             from@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="subject"
-            
+
             Subject of the email
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="to"
-            
+
             to@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="text"
-            
+
             Some text
             --%s--
             TXT,
@@ -149,55 +148,55 @@ class InfobipApiTransportTest extends TestCase
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="from"
-            
+
             "From" <from@example.com>
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="subject"
-            
+
             Subject of the email
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="to"
-            
+
             to1@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="to"
-            
+
             to2@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="cc"
-            
+
             cc@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="bcc"
-            
+
             bcc@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="replyto"
-            
+
             replyTo@example.com
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="text"
-            
+
             Some text
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="HTML"
-            
+
             <html><p>Hello!</p></html>
             --%s--
             TXT,
@@ -223,19 +222,19 @@ class InfobipApiTransportTest extends TestCase
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="text"
-            
+
             foobar
             --%s
             Content-Type: text/plain
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="attachment"; filename="attachment.txt"
-            
+
             some attachment
             --%s
             Content-Type: text/plain
             Content-Transfer-Encoding: 8bit
             Content-Disposition: form-data; name="inlineImage"; filename="inline.txt"
-            
+
             some inline attachment
             --%s--
             TXT,
@@ -265,7 +264,7 @@ class InfobipApiTransportTest extends TestCase
             Date: %s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: quoted-printable
-            
+
             Some text
             TXT,
             $sentMessage->toString()
@@ -300,16 +299,16 @@ class InfobipApiTransportTest extends TestCase
             Message-ID: <%x@example.com>
             MIME-Version: 1.0
             Content-Type: multipart/alternative; boundary=%s
-            
+
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: quoted-printable
-            
+
             Some text
             --%s
             Content-Type: text/html; charset=utf-8
             Content-Transfer-Encoding: quoted-printable
-            
+
             <html><p>Hello!</p></html>
             --%s--
             TXT,
@@ -334,24 +333,24 @@ class InfobipApiTransportTest extends TestCase
             <<<'TXT'
             %a
             Content-Type: multipart/mixed; boundary=%s
-            
+
             --%s
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: quoted-printable
-            
+
             foobar
             --%s
             Content-Type: text/plain; name=attachment.txt
             Content-Transfer-Encoding: base64
             Content-Disposition: attachment; name=attachment.txt;
              filename=attachment.txt
-            
+
             c29tZSBhdHRhY2htZW50
             --%s
             Content-Type: text/plain; name=inline.txt
             Content-Transfer-Encoding: base64
             Content-Disposition: inline; name=inline.txt; filename=inline.txt
-            
+
             c29tZSBpbmxpbmUgYXR0YWNobWVudA==
             --%s--
             TXT,
