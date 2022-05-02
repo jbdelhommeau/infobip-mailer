@@ -19,12 +19,12 @@ use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 
 class InfobipSmtpTransport extends EsmtpTransport
 {
-    public function __construct(string $username, string $password, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
+    public function __construct(string $key, EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
-        parent::__construct('smtp-api.infobip.com', 587, true, $dispatcher, $logger);
+        parent::__construct('smtp-api.infobip.com', 587, false, $dispatcher, $logger);
 
-        $this->setUsername($username);
-        $this->setPassword($password);
+        $this->setUsername('App');
+        $this->setPassword($key);
     }
 
 }

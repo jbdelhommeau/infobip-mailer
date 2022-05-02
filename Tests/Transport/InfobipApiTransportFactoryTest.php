@@ -52,23 +52,23 @@ class InfobipApiTransportFactoryTest extends TransportFactoryTestCase
         $logger = $this->getLogger();
 
         yield [
-            new Dsn('infobip+api', 'example.com', self::USER, self::PASSWORD),
-            (new InfobipApiTransport(self::USER, $this->getClient(), $dispatcher, $logger))->setHost('example.com'),
+            new Dsn('infobip+api', 'example.com', self::PASSWORD),
+            (new InfobipApiTransport(self::PASSWORD, $this->getClient(), $dispatcher, $logger))->setHost('example.com'),
         ];
 
         yield [
-            new Dsn('infobip', 'default', self::USER, self::PASSWORD),
-            new InfobipSmtpTransport(self::USER, self::PASSWORD, $dispatcher, $logger),
+            new Dsn('infobip', 'default', self::PASSWORD),
+            new InfobipSmtpTransport(self::PASSWORD, $dispatcher, $logger),
         ];
 
         yield [
-            new Dsn('infobip+smtp', 'default', self::USER, self::PASSWORD),
-            new InfobipSmtpTransport(self::USER, self::PASSWORD, $dispatcher, $logger),
+            new Dsn('infobip+smtp', 'default', self::PASSWORD),
+            new InfobipSmtpTransport(self::PASSWORD, $dispatcher, $logger),
         ];
 
         yield [
-            new Dsn('infobip+smtps', 'default', self::USER, self::PASSWORD),
-            new InfobipSmtpTransport(self::USER, self::PASSWORD, $dispatcher, $logger),
+            new Dsn('infobip+smtps', 'default', self::PASSWORD),
+            new InfobipSmtpTransport(self::PASSWORD, $dispatcher, $logger),
         ];
     }
 
@@ -83,5 +83,7 @@ class InfobipApiTransportFactoryTest extends TransportFactoryTestCase
     public function incompleteDsnProvider(): iterable
     {
         yield [new Dsn('infobip+smtp', 'default')];
+        yield [new Dsn('infobip+api', 'default')];
+        yield [new Dsn('infobip+api', 'default', self::PASSWORD)];
     }
 }
