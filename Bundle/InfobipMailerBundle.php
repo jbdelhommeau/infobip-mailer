@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Mailer\Bridge\Infobip\Bundle;
 
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
@@ -11,7 +12,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 final class InfobipMailerBundle extends Bundle
 {
-    public function getContainerExtension()
+    public function getContainerExtension(): ?ExtensionInterface
     {
         return new InfobipMailerExtension();
     }
