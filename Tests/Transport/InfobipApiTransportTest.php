@@ -21,6 +21,7 @@ use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class InfobipApiTransportTest extends TestCase
@@ -59,12 +60,12 @@ class InfobipApiTransportTest extends TestCase
         unset($this->response, $this->httpClient, $this->transport);
     }
 
-    public function testToString(): void
+    public function testToString()
     {
         $this->assertSame('infobip+api://99999.api.infobip.com', (string) $this->transport);
     }
 
-    public function testInfobipShouldBeCalledWithTheRightMethodAndUrlAndHeaders(): void
+    public function testInfobipShouldBeCalledWithTheRightMethodAndUrlAndHeaders()
     {
         $email = $this->basicValidEmail();
 
@@ -81,7 +82,7 @@ class InfobipApiTransportTest extends TestCase
         $this->assertStringMatchesFormat('Content-Length: %d', $options['headers'][3]);
     }
 
-    public function testSendMinimalEmailShouldCalledInfobipWithTheRightParameters(): void
+    public function testSendMinimalEmailShouldCalledInfobipWithTheRightParameters()
     {
         $email = (new Email())
             ->subject('Subject of the email')
@@ -125,7 +126,7 @@ class InfobipApiTransportTest extends TestCase
         );
     }
 
-    public function testSendFullEmailShouldCalledInfobipWithTheRightParameters(): void
+    public function testSendFullEmailShouldCalledInfobipWithTheRightParameters()
     {
         $email = (new Email())
             ->subject('Subject of the email')
@@ -135,7 +136,7 @@ class InfobipApiTransportTest extends TestCase
             ->html('<html><p>Hello!</p></html>')
             ->bcc('bcc@example.com')
             ->cc('cc@example.com')
-            ->date(new \DateTime('2022-04-28 14:00.00', new \DateTimeZone('UTC')))
+            ->date(new \DateTimeImmutable('2022-04-28 14:00.00', new \DateTimeZone('UTC')))
             ->replyTo('replyTo@example.com')
         ;
 
@@ -204,12 +205,12 @@ class InfobipApiTransportTest extends TestCase
         );
     }
 
-    public function testSendEmailWithAttachmentsShouldCalledInfobipWithTheRightParameters(): void
+    public function testSendEmailWithAttachmentsShouldCalledInfobipWithTheRightParameters()
     {
         $email = $this->basicValidEmail()
             ->text('foobar')
-            ->attach('some attachment', 'attachment.txt', 'text/plain')
-            ->embed('some inline attachment', 'inline.txt', 'text/plain')
+            ->addPart(new DataPart('some attachment', 'attachment.txt', 'text/plain'))
+            ->addPart((new DataPart('some inline attachment', 'inline.txt', 'text/plain'))->asInline())
         ;
 
         $this->transport->send($email);
@@ -242,7 +243,52 @@ class InfobipApiTransportTest extends TestCase
         );
     }
 
-    public function testSendMinimalEmailWithSuccess(): void
+    public function testSendEmailWithHeadersShouldCalledInfobipWithTheRightParameters()
+    {
+        $email = $this->basicValidEmail();
+        $email->getHeaders()
+            ->addTextHeader('X-Infobip-IntermediateReport', 'true')
+            ->addTextHeader('X-Infobip-NotifyUrl', 'https://foo.bar')
+            ->addTextHeader('X-Infobip-NotifyContentType', 'application/json')
+            ->addTextHeader('X-Infobip-MessageId', 'RANDOM-CUSTOM-ID');
+
+        $this->transport->send($email);
+
+        $options = $this->response->getRequestOptions();
+        $this->arrayHasKey('body');
+        $this->assertStringMatchesFormat(<<<'TXT'
+            %a
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="intermediateReport"
+
+            true
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="notifyUrl"
+
+            https://foo.bar
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="notifyContentType"
+
+            application/json
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="messageId"
+
+            RANDOM-CUSTOM-ID
+            --%s--
+            TXT,
+            $options['body']
+        );
+    }
+
+    public function testSendMinimalEmailWithSuccess()
     {
         $email = (new Email())
             ->subject('Subject of the email')
@@ -271,7 +317,7 @@ class InfobipApiTransportTest extends TestCase
         );
     }
 
-    public function testSendFullEmailWithSuccess(): void
+    public function testSendFullEmailWithSuccess()
     {
         $email = (new Email())
             ->subject('Subject of the email')
@@ -281,7 +327,7 @@ class InfobipApiTransportTest extends TestCase
             ->html('<html><p>Hello!</p></html>')
             ->bcc('bcc@example.com')
             ->cc('cc@example.com')
-            ->date(new \DateTime('2022-04-28 14:00.00', new \DateTimeZone('UTC')))
+            ->date(new \DateTimeImmutable('2022-04-28 14:00.00', new \DateTimeZone('UTC')))
             ->replyTo('replyTo@example.com')
         ;
 
@@ -318,12 +364,12 @@ class InfobipApiTransportTest extends TestCase
         $this->assertEquals([new Address('bcc@example.com')], $sentMessage->getOriginalMessage()->getBcc());
     }
 
-    public function testSendEmailWithAttachmentsWithSuccess(): void
+    public function testSendEmailWithAttachmentsWithSuccess()
     {
         $email = $this->basicValidEmail()
             ->text('foobar')
-            ->attach('some attachment', 'attachment.txt', 'text/plain')
-            ->embed('some inline attachment', 'inline.txt', 'text/plain')
+            ->addPart(new DataPart('some attachment', 'attachment.txt', 'text/plain'))
+            ->addPart((new DataPart('some inline attachment', 'inline.txt', 'text/plain'))->asInline())
         ;
 
         $sentMessage = $this->transport->send($email);
@@ -358,7 +404,32 @@ class InfobipApiTransportTest extends TestCase
         );
     }
 
-    public function testSentMessageShouldCaptureInfobipMessageId(): void
+    public function testSendEmailWithHeadersWithSuccess()
+    {
+        $email = $this->basicValidEmail();
+        $email->getHeaders()
+            ->addTextHeader('X-Infobip-IntermediateReport', 'true')
+            ->addTextHeader('X-Infobip-NotifyUrl', 'https://foo.bar')
+            ->addTextHeader('X-Infobip-NotifyContentType', 'application/json')
+            ->addTextHeader('X-Infobip-MessageId', 'RANDOM-CUSTOM-ID');
+
+        $sentMessage = $this->transport->send($email);
+
+        $this->assertInstanceOf(SentMessage::class, $sentMessage);
+        $this->assertStringMatchesFormat(
+            <<<'TXT'
+            %a
+            X-Infobip-IntermediateReport: true
+            X-Infobip-NotifyUrl: https://foo.bar
+            X-Infobip-NotifyContentType: application/json
+            X-Infobip-MessageId: RANDOM-CUSTOM-ID
+            %a
+            TXT,
+            $sentMessage->toString()
+        );
+    }
+
+    public function testSentMessageShouldCaptureInfobipMessageId()
     {
         $this->response = new MockResponse('{"messages": [{"messageId": "somexternalMessageId0"}]}');
         $email = $this->basicValidEmail();
@@ -368,35 +439,35 @@ class InfobipApiTransportTest extends TestCase
         $this->assertSame('somexternalMessageId0', $sentMessage->getMessageId());
     }
 
-    public function testInfobipResponseShouldNotBeEmpty(): void
+    public function testInfobipResponseShouldNotBeEmpty()
     {
         $this->response = new MockResponse();
         $email = $this->basicValidEmail();
 
         $this->expectException(HttpTransportException::class);
-        $this->expectDeprecationMessage('Unable to send an email: ""');
+        $this->expectExceptionMessage('Unable to send an email: ""');
 
         $this->transport->send($email);
     }
 
-    public function testInfobipResponseShouldBeStatusCode200(): void
+    public function testInfobipResponseShouldBeStatusCode200()
     {
         $this->response = new MockResponse('{"requestError": {"serviceException": {"messageId": "string","text": "string"}}}', ['http_code' => 400]);
         $email = $this->basicValidEmail();
 
         $this->expectException(HttpTransportException::class);
-        $this->expectDeprecationMessage('Unable to send an email: "{"requestError": {"serviceException": {"messageId": "string","text": "string"}}}" (code 400)');
+        $this->expectExceptionMessage('Unable to send an email: "{"requestError": {"serviceException": {"messageId": "string","text": "string"}}}" (code 400)');
 
         $this->transport->send($email);
     }
 
-    public function testInfobipHttpConnectionFailed(): void
+    public function testInfobipHttpConnectionFailed()
     {
         $this->response = new MockResponse('', ['error' => 'Test error']);
         $email = $this->basicValidEmail();
 
         $this->expectException(HttpTransportException::class);
-        $this->expectDeprecationMessage('Could not reach the remote Infobip server.');
+        $this->expectExceptionMessage('Could not reach the remote Infobip server.');
         $this->transport->send($email);
     }
 
