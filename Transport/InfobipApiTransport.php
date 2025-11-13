@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
- * @see https://www.infobip.com/docs/api#channels/email/send-email
+ * @see https://www.infobip.com/docs/api/channels/email/email-message-sending/send-fully-featured-email
  */
 final class InfobipApiTransport extends AbstractApiTransport
 {
@@ -42,6 +42,7 @@ final class InfobipApiTransport extends AbstractApiTransport
         'X-Infobip-TrackingUrl' => 'trackingUrl',
         'X-Infobip-TrackClicks' => 'trackClicks',
         'X-Infobip-TrackOpens' => 'trackOpens',
+        'X-Infobip-IpPoolId' => 'ipPoolId',
     ];
 
     public function __construct(
