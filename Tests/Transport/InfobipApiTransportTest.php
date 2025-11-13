@@ -252,7 +252,8 @@ class InfobipApiTransportTest extends TestCase
             ->addTextHeader('X-Infobip-Track', 'false')
             ->addTextHeader('X-Infobip-TrackingUrl', 'https://bar.foo')
             ->addTextHeader('X-Infobip-TrackClicks', 'true')
-            ->addTextHeader('X-Infobip-TrackOpens', 'true');
+            ->addTextHeader('X-Infobip-TrackOpens', 'true')
+            ->addTextHeader('X-Infobip-IpPoolId', 'pool-123');
 
         $this->transport->send($email);
 
@@ -308,6 +309,12 @@ class InfobipApiTransportTest extends TestCase
             Content-Disposition: form-data; name="trackOpens"
 
             true
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="ipPoolId"
+
+            pool-123
             --%s--
             TXT,
             $options['body']
@@ -441,7 +448,8 @@ class InfobipApiTransportTest extends TestCase
             ->addTextHeader('X-Infobip-Track', 'false')
             ->addTextHeader('X-Infobip-TrackingUrl', 'https://bar.foo')
             ->addTextHeader('X-Infobip-TrackClicks', 'true')
-            ->addTextHeader('X-Infobip-TrackOpens', 'true');
+            ->addTextHeader('X-Infobip-TrackOpens', 'true')
+            ->addTextHeader('X-Infobip-IpPoolId', 'pool-123');
 
         $sentMessage = $this->transport->send($email);
 
@@ -457,9 +465,34 @@ class InfobipApiTransportTest extends TestCase
             X-Infobip-TrackingUrl: https://bar.foo
             X-Infobip-TrackClicks: true
             X-Infobip-TrackOpens: true
+            X-Infobip-IpPoolId: pool-123
             %a
             TXT,
             $sentMessage->toString()
+        );
+    }
+
+    public function testSendEmailWithIpPoolIdShouldCalledInfobipWithTheRightParameters()
+    {
+        $email = $this->basicValidEmail();
+        $email->getHeaders()
+            ->addTextHeader('X-Infobip-IpPoolId', 'my-ip-pool-id');
+
+        $this->transport->send($email);
+
+        $options = $this->response->getRequestOptions();
+        $this->arrayHasKey('body');
+        $this->assertStringMatchesFormat(<<<'TXT'
+            %a
+            --%s
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
+            Content-Disposition: form-data; name="ipPoolId"
+
+            my-ip-pool-id
+            --%s--
+            TXT,
+            $options['body']
         );
     }
 
